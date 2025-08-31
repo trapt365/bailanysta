@@ -161,6 +161,7 @@ export default function UserProfile({ userId }: UserProfileProps) {
           posts={userPosts}
           isLoading={postsLoading}
           onPostUpdate={refetchPosts}
+          currentUserId="mock-user-id" // Mock user ID for MVP - in real app would come from auth
         />
       </div>
 

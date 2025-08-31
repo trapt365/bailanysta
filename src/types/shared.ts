@@ -60,6 +60,25 @@ export interface CreatePostOutput {
   success: boolean;
 }
 
+export interface UpdatePostInput {
+  id: string;
+  content: string;
+  mood?: Post['mood'];
+}
+
+export interface UpdatePostOutput {
+  post: Post;
+  success: boolean;
+}
+
+export interface DeletePostInput {
+  id: string;
+}
+
+export interface DeletePostOutput {
+  success: boolean;
+}
+
 // Form state types
 export interface PostFormData {
   content: string;

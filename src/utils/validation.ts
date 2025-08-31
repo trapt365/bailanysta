@@ -96,6 +96,26 @@ export type ReactionData = z.infer<typeof reactionSchema>
 export type CreateCommentInput = z.infer<typeof createCommentSchema>
 export type CommentData = z.infer<typeof commentSchema>
 
+// Post update validation schemas
+export const updatePostSchema = z.object({
+  id: z.string().uuid('Invalid post ID format'),
+  content: z
+    .string()
+    .min(1, 'Post cannot be empty')
+    .max(280, 'Post cannot exceed 280 characters')
+    .trim(),
+  mood: z
+    .enum(['Happy', 'Thoughtful', 'Excited', 'Contemplative', 'Energetic'])
+    .optional(),
+})
+
+export const deletePostSchema = z.object({
+  id: z.string().uuid('Invalid post ID format'),
+})
+
+export type UpdatePostInput = z.infer<typeof updatePostSchema>
+export type DeletePostInput = z.infer<typeof deletePostSchema>
+
 // Validation helper functions
 export const validatePostContent = (content: string): string[] => {
   const errors: string[] = []

@@ -1,22 +1,65 @@
 'use client'
 
-import React from 'react'
-import { Post } from '@/types/shared'
+import React, { useState } from 'react'
+import { Post, UpdatePostInput } from '@/types/shared'
+import { trpc } from '@/utils/trpc'
 import PostCard from '../feed/PostCard'
+import EditPostForm from '../forms/EditPostForm'
+import { Modal, Button } from '@/components/ui'
 
 interface UserPostsListProps {
   userId: string
   posts: Post[]
   isLoading?: boolean
   onPostUpdate?: () => void
+  currentUserId?: string // Added to determine ownership
 }
 
 export default function UserPostsList({ 
   userId, 
   posts, 
   isLoading = false, 
-  onPostUpdate 
+  onPostUpdate,
+  currentUserId = 'mock-user-id' // Mock user ID for MVP
 }: UserPostsListProps) {
+  const [editingPost, setEditingPost] = useState<Post | null>(null)
+  const [deleteConfirmPost, setDeleteConfirmPost] = useState<Post | null>(null)
+
+  // Post update mutation
+  const updatePostMutation = trpc.posts.update.useMutation({
+    onSuccess: () => {
+      onPostUpdate?.()
+      setEditingPost(null)
+    },
+    onError: (error) => {
+      console.error('Failed to update post:', error)
+      alert('Failed to update post. Please try again.')
+    }
+  })
+
+  // Post delete mutation
+  const deletePostMutation = trpc.posts.delete.useMutation({
+    onSuccess: () => {
+      onPostUpdate?.()
+      setDeleteConfirmPost(null)
+    },
+    onError: (error) => {
+      console.error('Failed to delete post:', error)
+      alert('Failed to delete post. Please try again.')
+    }
+  })
+
+  const handleEditPost = async (data: UpdatePostInput) => {
+    updatePostMutation.mutate(data)
+  }
+
+  const handleDeletePost = () => {
+    if (deleteConfirmPost) {
+      deletePostMutation.mutate({ id: deleteConfirmPost.id })
+    }
+  }
+
+  const isOwner = (post: Post) => post.authorId === currentUserId
   if (isLoading) {
     return (
       <div className="p-6">
@@ -62,15 +105,95 @@ export default function UserPostsList({
   }
 
   return (
-    <div className="divide-y divide-gray-200 dark:divide-gray-700">
-      {posts.map((post) => (
-        <div key={post.id} className="p-6">
-          <PostCard 
-            post={post} 
-            onUpdate={onPostUpdate}
-          />
+    <>
+      <div className="divide-y divide-gray-200 dark:divide-gray-700">
+        {posts.map((post) => (
+          <div key={post.id} className="relative">
+            {editingPost?.id === post.id ? (
+              <div className="p-6">
+                <EditPostForm 
+                  post={post}
+                  onSave={handleEditPost}
+                  onCancel={() => setEditingPost(null)}
+                  isLoading={updatePostMutation.isPending}
+                />
+              </div>
+            ) : (
+              <div className="p-6">
+                <div className="relative">
+                  <PostCard 
+                    post={post} 
+                    onUpdate={onPostUpdate}
+                  />
+                  
+                  {/* Management buttons for post owner */}
+                  {isOwner(post) && (
+                    <div className="absolute top-2 right-2 flex space-x-2">
+                      <button
+                        onClick={() => setEditingPost(post)}
+                        className="text-gray-400 hover:text-blue-600 p-1 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                        title="Edit post"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => setDeleteConfirmPost(post)}
+                        className="text-gray-400 hover:text-red-600 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                        title="Delete post"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Delete confirmation modal */}
+      <Modal
+        isOpen={!!deleteConfirmPost}
+        onClose={() => setDeleteConfirmPost(null)}
+        title="Delete Post"
+      >
+        <div className="space-y-4">
+          <p className="text-gray-700 dark:text-gray-300">
+            Are you sure you want to delete this post? This action cannot be undone.
+            All comments and reactions will also be removed.
+          </p>
+          
+          {deleteConfirmPost && (
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border">
+              <p className="text-sm text-gray-800 dark:text-gray-200 line-clamp-3">
+                {deleteConfirmPost.content}
+              </p>
+            </div>
+          )}
+          
+          <div className="flex justify-end space-x-2">
+            <Button
+              variant="ghost"
+              onClick={() => setDeleteConfirmPost(null)}
+              disabled={deletePostMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeletePost}
+              loading={deletePostMutation.isPending}
+            >
+              {deletePostMutation.isPending ? 'Deleting...' : 'Delete Post'}
+            </Button>
+          </div>
         </div>
-      ))}
-    </div>
+      </Modal>
+    </>
   )
 }

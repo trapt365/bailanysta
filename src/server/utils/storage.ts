@@ -371,7 +371,25 @@ export async function deletePost(id: string): Promise<boolean> {
   try {
     const data = await readData()
     if (data.posts[id]) {
+      // Cascade deletion: remove associated comments
+      const commentsToDelete = Object.keys(data.comments).filter(
+        commentId => data.comments[commentId].postId === id
+      )
+      commentsToDelete.forEach(commentId => {
+        delete data.comments[commentId]
+      })
+      
+      // Cascade deletion: remove associated reactions
+      const reactionsToDelete = Object.keys(data.reactions).filter(
+        reactionKey => data.reactions[reactionKey].postId === id
+      )
+      reactionsToDelete.forEach(reactionKey => {
+        delete data.reactions[reactionKey]
+      })
+      
+      // Delete the post itself
       delete data.posts[id]
+      
       await writeData(data)
       return true
     }

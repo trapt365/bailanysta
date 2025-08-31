@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import { router, publicProcedure } from '../trpc'
-import { createPostSchema } from '@/utils/validation'
+import { createPostSchema, updatePostSchema, deletePostSchema } from '@/utils/validation'
 import { createPost, getPosts, getPostById } from '../utils/storage'
+import { postService } from '../services/postService'
 
 // Mock user for MVP - in real app this would come from auth
 const MOCK_USER = {
@@ -79,6 +80,59 @@ export const postsRouter = router({
       } catch (error) {
         console.error('Error fetching post:', error)
         throw new Error('Failed to fetch post')
+      }
+    }),
+
+  // Update a post (requires ownership)
+  update: publicProcedure
+    .input(updatePostSchema)
+    .mutation(async ({ input }) => {
+      try {
+        const { id, content, mood } = input
+        const updatedPost = await postService.updatePost(
+          id,
+          { content, mood },
+          MOCK_USER.id // In real app, this would come from authenticated user context
+        )
+        
+        return {
+          success: true,
+          post: updatedPost
+        }
+      } catch (error: any) {
+        console.error('Error updating post:', error)
+        
+        // Re-throw tRPC errors as-is
+        if (error.code) {
+          throw error
+        }
+        
+        throw new Error('Failed to update post')
+      }
+    }),
+
+  // Delete a post (requires ownership)
+  delete: publicProcedure
+    .input(deletePostSchema)
+    .mutation(async ({ input }) => {
+      try {
+        await postService.deletePost(
+          input.id,
+          MOCK_USER.id // In real app, this would come from authenticated user context
+        )
+        
+        return {
+          success: true
+        }
+      } catch (error: any) {
+        console.error('Error deleting post:', error)
+        
+        // Re-throw tRPC errors as-is
+        if (error.code) {
+          throw error
+        }
+        
+        throw new Error('Failed to delete post')
       }
     })
 })
