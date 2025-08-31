@@ -2,43 +2,67 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState } from 'react'
+import { HomeIcon, UserIcon, SearchIcon, TrendingIcon, PlusIcon } from '../ui/icons'
+import { Modal, Button } from '../ui'
+import CreatePostForm from '../forms/CreatePostForm'
+import { CreatePostInput } from '@/types/shared'
+import { trpc } from '@/utils/trpc'
+import { usePostsStore, createOptimisticPost } from '@/stores/postsStore'
 
 const navigationItems = [
   { href: '/', label: 'Feed', icon: 'home' },
   { href: '/profile', label: 'Profile', icon: 'user' },
   { href: '/search', label: 'Search', icon: 'search' },
   { href: '/hashtag', label: 'Trending', icon: 'trending' },
-]
+] as const
 
 const IconComponent = ({ icon }: { icon: string }) => {
-  const icons = {
-    home: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-      </svg>
-    ),
-    user: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-      </svg>
-    ),
-    search: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-      </svg>
-    ),
-    trending: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-      </svg>
-    ),
-  }
+  const iconMap = {
+    home: HomeIcon,
+    user: UserIcon,
+    search: SearchIcon,
+    trending: TrendingIcon,
+    plus: PlusIcon,
+  } as const
   
-  return icons[icon as keyof typeof icons] || null
+  const IconComp = iconMap[icon as keyof typeof iconMap]
+  return IconComp ? <IconComp /> : null
 }
 
 export default function Navigation() {
   const pathname = usePathname()
+  const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false)
+  const { addOptimisticPost, removeOptimisticPost } = usePostsStore()
+  
+  const createPostMutation = trpc.posts.create.useMutation({
+    onSuccess: (result, variables) => {
+      // Remove optimistic post and add real post
+      const optimisticId = `optimistic-${variables.content.slice(0, 10)}`
+      removeOptimisticPost(optimisticId)
+      
+      setIsCreatePostModalOpen(false)
+      console.log('Post created successfully!')
+    },
+    onError: (error, variables) => {
+      // Remove failed optimistic post
+      const optimisticId = `optimistic-${variables.content.slice(0, 10)}`
+      removeOptimisticPost(optimisticId)
+      
+      console.error('Failed to create post:', error)
+    }
+  })
+
+  const handleCreatePost = async (data: CreatePostInput) => {
+    // Add optimistic post immediately
+    const optimisticPost = createOptimisticPost(data.content, data.mood)
+    // Use a more predictable ID for removal
+    optimisticPost.id = `optimistic-${data.content.slice(0, 10)}`
+    addOptimisticPost(optimisticPost)
+    
+    // Trigger actual API call
+    createPostMutation.mutate(data)
+  }
 
   return (
     <nav className="w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 min-h-screen p-4 hidden lg:block">
@@ -61,7 +85,30 @@ export default function Navigation() {
             </Link>
           )
         })}
+        
+        {/* Create Post Button */}
+        <Button
+          onClick={() => setIsCreatePostModalOpen(true)}
+          className="w-full mt-4"
+          variant="primary"
+        >
+          <PlusIcon className="w-5 h-5 mr-2" />
+          Create Post
+        </Button>
       </div>
+
+      {/* Create Post Modal */}
+      <Modal
+        isOpen={isCreatePostModalOpen}
+        onClose={() => setIsCreatePostModalOpen(false)}
+        title="Create New Post"
+      >
+        <CreatePostForm
+          onSubmit={handleCreatePost}
+          onCancel={() => setIsCreatePostModalOpen(false)}
+          isSubmitting={createPostMutation.isPending}
+        />
+      </Modal>
 
       {/* Mobile Bottom Navigation */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
@@ -84,6 +131,15 @@ export default function Navigation() {
               </Link>
             )
           })}
+          
+          {/* Mobile Create Post Button */}
+          <button
+            onClick={() => setIsCreatePostModalOpen(true)}
+            className="flex flex-col items-center py-2 px-3 text-blue-600 dark:text-blue-400"
+          >
+            <PlusIcon className="w-6 h-6" />
+            <span className="text-xs mt-1">Create</span>
+          </button>
         </div>
       </div>
     </nav>

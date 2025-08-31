@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Layout from "@/components/layout/Layout";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import { TrpcProvider } from "@/providers/TrpcProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,9 +34,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Layout>
-          {children}
-        </Layout>
+        <TrpcProvider>
+          <ErrorBoundary>
+            <Layout>
+              {children}
+            </Layout>
+          </ErrorBoundary>
+        </TrpcProvider>
       </body>
     </html>
   );
