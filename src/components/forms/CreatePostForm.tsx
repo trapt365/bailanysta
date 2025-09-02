@@ -1,11 +1,13 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, Textarea } from '@/components/ui'
+import LoadingButton from '@/components/ui/LoadingButton'
 import { createPostSchema } from '@/utils/validation'
 import { CreatePostInput } from '@/types/shared'
+import { HashtagSuggestions } from '@/components/hashtag'
 
 interface CreatePostFormProps {
   onSubmit: (data: CreatePostInput) => Promise<void>
@@ -19,12 +21,14 @@ export default function CreatePostForm({
   isSubmitting = false 
 }: CreatePostFormProps) {
   const [characterCount, setCharacterCount] = useState(0)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   
   const {
     register,
     handleSubmit,
     watch,
     reset,
+    setValue,
     formState: { errors, isValid }
   } = useForm<CreatePostInput>({
     resolver: zodResolver(createPostSchema),
@@ -52,6 +56,11 @@ export default function CreatePostForm({
       console.error('Form submission error:', error)
     }
   }
+
+  // Handle content changes from hashtag suggestions
+  const handleContentChange = (newContent: string) => {
+    setValue('content', newContent, { shouldValidate: true })
+  }
   
   const getCharacterCountColor = () => {
     if (characterCount > 280) return 'text-red-600'
@@ -63,15 +72,25 @@ export default function CreatePostForm({
   
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-      <div className="space-y-2">
-        <Textarea
-          {...register('content')}
-          placeholder="What's on your mind?"
-          rows={4}
-          className="text-lg"
-          error={errors.content?.message}
-          disabled={isSubmitting}
-        />
+      <div className="space-y-2 relative">
+        <div className="relative">
+          <Textarea
+            {...register('content')}
+            ref={textareaRef}
+            placeholder="What's on your mind? Use #hashtags to categorize your post!"
+            rows={4}
+            className="text-lg"
+            error={errors.content?.message}
+            disabled={isSubmitting}
+          />
+          
+          {/* Hashtag Suggestions */}
+          <HashtagSuggestions
+            textareaRef={textareaRef}
+            content={content}
+            onContentChange={handleContentChange}
+          />
+        </div>
         
         {/* Character counter */}
         <div className="flex justify-between items-center">
@@ -124,13 +143,14 @@ export default function CreatePostForm({
           </Button>
         )}
         
-        <Button
+        <LoadingButton
           type="submit"
-          loading={isSubmitting}
+          isLoading={isSubmitting}
+          loadingText="Publishing..."
           disabled={!isValid || characterCount === 0 || characterCount > 280}
         >
-          {isSubmitting ? 'Publishing...' : 'Publish Post'}
-        </Button>
+          Publish Post
+        </LoadingButton>
       </div>
     </form>
   )

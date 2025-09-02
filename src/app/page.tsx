@@ -5,6 +5,7 @@ import { trpc } from '@/utils/trpc'
 import CreatePostForm from '@/components/forms/CreatePostForm'
 import PostFeed from '@/components/feed/PostFeed'
 import { Modal } from '@/components/ui'
+import { PopularHashtags } from '@/components/hashtag'
 import { CreatePostInput } from '@/types/shared'
 
 export default function Feed() {
@@ -54,6 +55,16 @@ export default function Feed() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Popular Hashtags */}
+      <div className="mb-6">
+        <PopularHashtags 
+          limit={6}
+          variant="cloud"
+          showTitle={true}
+          showCounts={false}
+        />
       </div>
 
       {/* Post Feed */}

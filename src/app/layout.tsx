@@ -4,6 +4,7 @@ import "./globals.css";
 import Layout from "@/components/layout/Layout";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import { TrpcProvider } from "@/providers/TrpcProvider";
+import { ThemeInitializer } from "@/components/ui/ThemeInitializer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <ThemeInitializer />
         <TrpcProvider>
           <ErrorBoundary>
             <Layout>

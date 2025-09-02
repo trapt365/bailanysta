@@ -18,13 +18,13 @@ export default function Button({
   disabled,
   ...props
 }: ButtonProps) {
-  const baseClasses = 'font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
+  const baseClasses = 'font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95 motion-reduce:transition-none motion-reduce:animate-none motion-reduce:transform-none'
   
   const variantClasses = {
-    primary: 'bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500',
-    secondary: 'bg-gray-600 hover:bg-gray-700 text-white focus:ring-gray-500',
-    outline: 'border border-gray-300 hover:bg-gray-50 text-gray-700 focus:ring-blue-500',
-    ghost: 'hover:bg-gray-100 text-gray-700 focus:ring-blue-500'
+    primary: 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5 dark:bg-blue-600 dark:hover:bg-blue-700 text-white focus:ring-blue-500',
+    secondary: 'bg-gray-600 hover:bg-gray-700 hover:shadow-lg hover:-translate-y-0.5 dark:bg-gray-700 dark:hover:bg-gray-600 text-white focus:ring-gray-500',
+    outline: 'border border-gray-300 dark:border-gray-600 hover:bg-gray-50 hover:shadow-md dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-blue-500',
+    ghost: 'hover:bg-gray-100 hover:shadow-sm dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-blue-500'
   }
   
   const sizeClasses = {

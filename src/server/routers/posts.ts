@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { router, publicProcedure } from '../trpc'
 import { createPostSchema, updatePostSchema, deletePostSchema } from '@/utils/validation'
-import { createPost, getPosts, getPostById } from '../utils/storage'
+import { createPost, getPosts, getPostById, getPostsByHashtag } from '../utils/storage'
 import { postService } from '../services/postService'
 
 // Mock user for MVP - in real app this would come from auth
@@ -80,6 +80,27 @@ export const postsRouter = router({
       } catch (error) {
         console.error('Error fetching post:', error)
         throw new Error('Failed to fetch post')
+      }
+    }),
+
+  // Get posts by hashtag
+  getByHashtag: publicProcedure
+    .input(z.object({
+      hashtag: z.string().min(1, 'Hashtag cannot be empty'),
+      limit: z.number().min(1).max(100).optional().default(20),
+      offset: z.number().min(0).optional().default(0)
+    }))
+    .query(async ({ input }) => {
+      try {
+        const posts = await getPostsByHashtag(input.hashtag, {
+          limit: input.limit,
+          offset: input.offset,
+          sortBy: 'createdAt'
+        })
+        return posts
+      } catch (error) {
+        console.error('Error fetching posts by hashtag:', error)
+        throw new Error('Failed to fetch posts by hashtag')
       }
     }),
 

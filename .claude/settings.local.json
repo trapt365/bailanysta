@@ -14,7 +14,9 @@
       "Bash(npx next:*)",
       "Bash(git commit:*)",
       "Bash(git add:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(npx vitest run:*)",
+      "Bash(npx vitest:*)"
     ],
     "deny": [],
     "ask": []

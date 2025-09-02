@@ -1,0 +1,72 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install Vercel CLI
+      run: npm install --global vercel@latest
+
+    - name: Pull Vercel Environment Information
+      run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: Build Project Artifacts
+      run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: Deploy Project Artifacts to Vercel
+      run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+  post-deploy:
+    name: Post-deployment checks
+    needs: deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci --legacy-peer-deps
+
+    - name: Wait for deployment
+      run: |
+        echo "Waiting for deployment to be ready..."
+        sleep 30
+
+    - name: Run smoke tests
+      env:
+        NEXT_PUBLIC_APP_URL: ${{ secrets.VERCEL_URL }}
+      run: npm run test:smoke
+
+    - name: Run performance tests
+      env:
+        NEXT_PUBLIC_APP_URL: ${{ secrets.VERCEL_URL }}
+      run: npm run test:performance
+
+    - name: Run deployment verification script
+      env:
+        VERCEL_URL: ${{ secrets.VERCEL_URL }}
+      run: |
+        chmod +x ./scripts/verify-deployment.sh
+        ./scripts/verify-deployment.sh

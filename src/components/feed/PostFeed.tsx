@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { trpc } from '@/utils/trpc'
 import { Post } from '@/types/shared'
 import PostCard from './PostCard'
+import PostCardSkeleton from '../ui/PostCardSkeleton'
 
 export default function PostFeed() {
   const [posts, setPosts] = useState<Post[]>([])
@@ -28,28 +29,9 @@ export default function PostFeed() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        {/* Loading skeleton */}
+      <div className="space-y-4 animate-fade-in">
         {Array.from({ length: 3 }).map((_, index) => (
-          <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className="flex items-start space-x-3">
-              <div className="w-10 h-10 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse"></div>
-              <div className="flex-1 space-y-2">
-                <div className="flex items-center space-x-2">
-                  <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded animate-pulse w-24"></div>
-                  <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded animate-pulse w-16"></div>
-                </div>
-                <div className="space-y-1">
-                  <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded animate-pulse w-full"></div>
-                  <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded animate-pulse w-3/4"></div>
-                </div>
-                <div className="flex space-x-4 pt-2">
-                  <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded animate-pulse w-12"></div>
-                  <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded animate-pulse w-12"></div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <PostCardSkeleton key={index} />
         ))}
       </div>
     )

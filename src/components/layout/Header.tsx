@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { NotificationIcon, MessageIcon } from '../ui/icons'
+import { SearchInput } from '@/components/search'
 
 export default function Header() {
   return (
@@ -20,13 +21,10 @@ export default function Header() {
 
           {/* Search Bar - Hidden on mobile */}
           <div className="hidden md:flex flex-1 max-w-lg mx-8">
-            <div className="relative w-full">
-              <input
-                type="text"
-                placeholder="Search posts, users, hashtags..."
-                className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+            <SearchInput 
+              placeholder="Search posts, users, hashtags..."
+              className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
           </div>
 
           {/* User Actions */}

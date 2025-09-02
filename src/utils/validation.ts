@@ -134,11 +134,8 @@ export const validatePostContent = (content: string): string[] => {
 // Character counting utility
 export const getCharacterCount = (text: string): number => text.length
 
-// Hashtag extraction utility
-export const extractHashtags = (content: string): string[] => {
-  const hashtags = content.match(/#[\w]+/g) || []
-  return hashtags.map(tag => tag.slice(1).toLowerCase())
-}
+// Hashtag extraction utility - using enhanced implementation
+export { extractHashtags } from './hashtags'
 
 // Comment validation utility
 export const validateCommentContent = (content: string): string[] => {

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { HomeIcon, UserIcon, SearchIcon, TrendingIcon, PlusIcon } from '../ui/icons'
-import { Modal, Button } from '../ui'
+import { Modal, Button, ThemeToggle } from '../ui'
 import CreatePostForm from '../forms/CreatePostForm'
 import { CreatePostInput } from '@/types/shared'
 import { trpc } from '@/utils/trpc'
@@ -95,6 +95,14 @@ export default function Navigation() {
           <PlusIcon className="w-5 h-5 mr-2" />
           Create Post
         </Button>
+        
+        {/* Theme Toggle */}
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+          <div className="flex items-center justify-between px-4">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Theme</span>
+            <ThemeToggle />
+          </div>
+        </div>
       </div>
 
       {/* Create Post Modal */}
@@ -120,7 +128,7 @@ export default function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center py-2 px-3 ${
+                className={`flex flex-col items-center py-2 px-2 ${
                   isActive
                     ? 'text-blue-600 dark:text-blue-400'
                     : 'text-gray-600 dark:text-gray-400'
@@ -135,11 +143,17 @@ export default function Navigation() {
           {/* Mobile Create Post Button */}
           <button
             onClick={() => setIsCreatePostModalOpen(true)}
-            className="flex flex-col items-center py-2 px-3 text-blue-600 dark:text-blue-400"
+            className="flex flex-col items-center py-2 px-2 text-blue-600 dark:text-blue-400"
           >
             <PlusIcon className="w-6 h-6" />
             <span className="text-xs mt-1">Create</span>
           </button>
+          
+          {/* Mobile Theme Toggle */}
+          <div className="flex flex-col items-center py-2 px-2">
+            <ThemeToggle className="p-1" />
+            <span className="text-xs mt-1 text-gray-600 dark:text-gray-400">Theme</span>
+          </div>
         </div>
       </div>
     </nav>

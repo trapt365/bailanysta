@@ -1,7 +1,7 @@
 import { Post } from '@/types/shared'
-import { updatePost, deletePost, getPostById, getUserPosts, deleteComment, getUserReaction } from '../utils/storage'
+import { updatePost, deletePost, getPostById, getUserPosts, deleteComment, getUserReaction, getPosts } from '../utils/storage'
 import { TRPCError } from '@trpc/server'
-import { extractHashtags } from '@/utils/validation'
+import { extractHashtags } from '@/utils/hashtags'
 
 export class PostService {
   /**
@@ -129,6 +129,79 @@ export class PostService {
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'Failed to fetch user posts',
+      })
+    }
+  }
+  
+  /**
+   * Build hashtag index from all posts for search optimization
+   * Returns a map of hashtags to post IDs for efficient lookups
+   */
+  async buildHashtagIndex(): Promise<Map<string, Set<string>>> {
+    try {
+      const allPosts = await getPosts({ sortBy: 'createdAt' })
+      const hashtagIndex = new Map<string, Set<string>>()
+      
+      for (const post of allPosts) {
+        if (post.hashtags && post.hashtags.length > 0) {
+          for (const hashtag of post.hashtags) {
+            const normalizedTag = hashtag.toLowerCase()
+            if (!hashtagIndex.has(normalizedTag)) {
+              hashtagIndex.set(normalizedTag, new Set())
+            }
+            hashtagIndex.get(normalizedTag)!.add(post.id)
+          }
+        }
+      }
+      
+      return hashtagIndex
+    } catch (error) {
+      console.error('Error building hashtag index:', error)
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to build hashtag index',
+      })
+    }
+  }
+  
+  /**
+   * Get hashtag statistics for analytics and popular hashtags display
+   */
+  async getHashtagStats(): Promise<Array<{ hashtag: string; count: number; recentUsage: Date }>> {
+    try {
+      const allPosts = await getPosts({ sortBy: 'createdAt' })
+      const hashtagStats = new Map<string, { count: number; recentUsage: Date }>()
+      
+      for (const post of allPosts) {
+        if (post.hashtags && post.hashtags.length > 0) {
+          for (const hashtag of post.hashtags) {
+            const normalizedTag = hashtag.toLowerCase()
+            const currentStats = hashtagStats.get(normalizedTag) || { count: 0, recentUsage: new Date(0) }
+            
+            hashtagStats.set(normalizedTag, {
+              count: currentStats.count + 1,
+              recentUsage: post.createdAt > currentStats.recentUsage ? post.createdAt : currentStats.recentUsage
+            })
+          }
+        }
+      }
+      
+      // Convert to array and sort by count (descending) and recent usage
+      return Array.from(hashtagStats.entries())
+        .map(([hashtag, stats]) => ({ hashtag, ...stats }))
+        .sort((a, b) => {
+          // Primary sort: count (descending)
+          if (b.count !== a.count) {
+            return b.count - a.count
+          }
+          // Secondary sort: recent usage (descending)
+          return b.recentUsage.getTime() - a.recentUsage.getTime()
+        })
+    } catch (error) {
+      console.error('Error getting hashtag stats:', error)
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to get hashtag statistics',
       })
     }
   }

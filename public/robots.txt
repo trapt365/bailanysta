@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Optimize crawling
+Sitemap: https://bailanysta.vercel.app/sitemap.xml
+
+# Block admin and API routes from crawling
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /.*

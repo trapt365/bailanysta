@@ -1,8 +1,14 @@
 import { initTRPC } from '@trpc/server'
 import { z } from 'zod'
+import { validateEnv, getEnvConfig } from './middleware/envValidation'
+
+// Validate environment on server startup
+validateEnv()
 
 // Create context type
-export interface Context {}
+export interface Context {
+  env: ReturnType<typeof getEnvConfig>
+}
 
 // Initialize tRPC
 const t = initTRPC.context<Context>().create()

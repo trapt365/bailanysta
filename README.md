@@ -380,43 +380,181 @@ npm run test:ui          # Run with Vitest UI dashboard
 - **Error Handling**: Implement proper error boundaries and handling
 - **Performance**: Optimize for Core Web Vitals and user experience
 
-## 🚀 Deployment
+## 🚀 Production Deployment
 
-### Vercel Deployment (Recommended)
+### Automated CI/CD with GitHub Actions
 
-1. **Connect Repository**: Link GitHub repo to Vercel
-2. **Environment Variables**: Set production environment variables
-3. **Deploy**: Automatic deployment on push to main branch
+The project includes comprehensive CI/CD pipeline with automated testing, building, and deployment to Vercel.
+
+#### Prerequisites for Production Deployment
+
+1. **Vercel Account**: Sign up at [vercel.com](https://vercel.com)
+2. **GitHub Repository**: Code must be in a GitHub repository
+3. **Environment Variables**: Configure production secrets
+
+#### Quick Production Setup
 
 ```bash
-# Deploy with Vercel CLI
-npm install -g vercel
+# 1. Install Vercel CLI
+npm install -g vercel@latest
+
+# 2. Link your project to Vercel
+vercel link
+
+# 3. Set up production environment variables
+vercel env add NEXT_PUBLIC_APP_URL production
+vercel env add JWT_SECRET production
+vercel env add SESSION_SECRET production
+
+# 4. Deploy to production
 vercel --prod
 ```
 
+### GitHub Actions Integration
+
+The project includes two automated workflows:
+
+#### 1. Continuous Integration (`.github/workflows/ci.yml`)
+- **Triggered on**: Push to `main` or `develop`, Pull Requests
+- **Actions**: 
+  - Install dependencies with legacy peer deps
+  - Run TypeScript type checking
+  - Execute ESLint linting
+  - Run complete test suite
+  - Build application
+  - Validate bundle size (<500KB requirement)
+
+#### 2. Production Deployment (`.github/workflows/deploy.yml`)
+- **Triggered on**: Push to `main` branch only
+- **Actions**:
+  - Deploy to Vercel production environment
+  - Run post-deployment health checks
+  - Verify deployment with automated smoke tests
+
 ### Environment Variables (Production)
 
+Set these variables in your Vercel dashboard or using the CLI:
+
 ```bash
-# Application
+# Frontend (exposed to browser)
+NEXT_PUBLIC_APP_NAME="Bailanysta"
 NEXT_PUBLIC_APP_URL="https://your-domain.vercel.app"
+NEXT_PUBLIC_API_URL="https://your-domain.vercel.app/api"
 NEXT_PUBLIC_ENVIRONMENT="production"
 
-# Database
+# Backend (server-side only)
+JWT_SECRET="your-strong-random-jwt-secret-32-chars+"
+SESSION_SECRET="your-strong-random-session-secret-32-chars+"
+DATABASE_URL="file:./data/bailanysta.json"  # MVP: JSON, Future: Vercel KV
+NODE_ENV="production"
+
+# Vercel deployment (for GitHub Actions)
+VERCEL_TOKEN="your-vercel-auth-token"
+VERCEL_ORG_ID="your-vercel-org-id"
+VERCEL_PROJECT_ID="your-vercel-project-id"
+
+# Optional: Future Vercel integrations
 VERCEL_KV_REST_API_URL="your-vercel-kv-url"
 VERCEL_KV_REST_API_TOKEN="your-vercel-kv-token"
-
-# Security
-JWT_SECRET="your-production-jwt-secret"
-SESSION_SECRET="your-production-session-secret"
+VERCEL_BLOB_READ_WRITE_TOKEN="your-blob-token"
 ```
 
-### Performance Optimizations
+### Production Build Features
 
-- **Bundle Size**: Code splitting and dynamic imports
-- **Images**: Next.js Image optimization
-- **Fonts**: Optimized font loading with next/font
-- **Caching**: Static generation and ISR where appropriate
-- **CDN**: Automatic asset optimization via Vercel
+#### Build Optimizations
+- **Turbopack**: Ultra-fast bundling (10x faster than Webpack)
+- **Tree Shaking**: Automatic dead code elimination
+- **Bundle Analysis**: Automated size validation (<500KB target)
+- **Asset Optimization**: Automatic compression and modern formats
+- **Code Splitting**: Route-based and dynamic imports
+
+#### Security Headers
+- **CSP**: Content Security Policy for XSS protection
+- **HSTS**: HTTP Strict Transport Security
+- **X-Frame-Options**: Clickjacking protection
+- **X-Content-Type-Options**: MIME type sniffing protection
+
+#### Performance Monitoring
+- **Vercel Analytics**: Page views and performance metrics
+- **Web Vitals**: Core Web Vitals tracking (LCP, FID, CLS)
+- **Error Monitoring**: Automated error tracking and reporting
+- **Health Checks**: Continuous deployment verification
+
+### Deployment Verification
+
+#### Automated Verification Script
+Run the deployment verification script to ensure production readiness:
+
+```bash
+# Run comprehensive deployment checks
+./scripts/verify-deployment.sh
+```
+
+The script verifies:
+- ✅ Health endpoint responds correctly
+- ✅ Static assets load properly
+- ✅ Security headers are configured
+- ✅ Performance meets targets
+- ✅ Error handling works correctly
+
+#### Deployment Checklist
+Refer to [`docs/deployment-checklist.md`](./docs/deployment-checklist.md) for complete pre-deployment and post-deployment verification steps.
+
+#### Smoke Tests
+Automated smoke tests run after each deployment:
+
+```bash
+# Run deployment smoke tests
+npm test -- tests/deployment/smoke.test.ts
+
+# Run build verification tests  
+npm test -- tests/deployment/build.test.ts
+
+# Run performance tests
+npm test -- tests/deployment/performance.test.ts
+```
+
+### Monitoring and Maintenance
+
+#### Production Monitoring
+- **Health Endpoint**: `/api/health` - Real-time application status
+- **Analytics Endpoint**: `/api/analytics` - Performance and error data
+- **Vercel Dashboard**: Built-in metrics and logs
+- **Error Boundaries**: Global error handling with reporting
+
+#### Performance Targets
+- **Bundle Size**: <500KB initial, <200KB per route
+- **Page Load**: <3 seconds on slow 3G
+- **API Response**: <500ms average
+- **Core Web Vitals**: LCP <2.5s, FID <100ms, CLS <0.1
+
+#### Rollback Procedures
+If issues occur post-deployment:
+
+1. **Immediate Rollback**: Use Vercel dashboard to revert to previous deployment
+2. **Health Check Monitoring**: Automated alerts via `/api/health` endpoint
+3. **Error Analysis**: Review error monitoring data
+4. **Database Integrity**: Verify JSON storage integrity
+
+### Production-Ready Features
+
+#### Infrastructure
+- ✅ **Vercel CDN**: Global edge network for optimal performance
+- ✅ **Serverless Functions**: Auto-scaling API endpoints
+- ✅ **HTTPS Enforcement**: Automatic SSL/TLS certificates
+- ✅ **Domain Management**: Custom domain support
+
+#### Observability
+- ✅ **Structured Logging**: Environment-aware logging levels
+- ✅ **Error Tracking**: Production error collection and analysis
+- ✅ **Performance Metrics**: Real-time Web Vitals monitoring
+- ✅ **Health Monitoring**: Continuous availability checking
+
+#### SEO & Accessibility
+- ✅ **Meta Tags**: Dynamic Open Graph and Twitter Card support
+- ✅ **Sitemap**: Automatically generated and updated
+- ✅ **Robots.txt**: Search engine crawling optimization
+- ✅ **PWA Manifest**: Progressive Web App capabilities
 
 ## ⚠️ Known Issues & Limitations
 

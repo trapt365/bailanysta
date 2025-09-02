@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    name: Test and Build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci --legacy-peer-deps
+
+    - name: Run type check
+      run: npm run type-check
+
+    - name: Run linting
+      run: npm run lint
+
+    - name: Run tests
+      run: npm run test
+
+    - name: Build application
+      run: npm run build
+
+    - name: Check bundle size
+      run: |
+        if [ -d ".next" ]; then
+          echo "Build successful"
+          # Check if .next/static/chunks exists and calculate size
+          if [ -d ".next/static/chunks" ]; then
+            BUNDLE_SIZE=$(du -sk .next/static/chunks | cut -f1)
+            echo "Bundle size: ${BUNDLE_SIZE}KB"
+            if [ $BUNDLE_SIZE -gt 512 ]; then
+              echo "Warning: Bundle size exceeds 500KB target"
+              exit 1
+            fi
+          fi
+        else
+          echo "Build failed - .next directory not found"
+          exit 1
+        fi
+
+    - name: Run deployment build tests
+      run: npm run test:build
+
+    - name: Test coverage report
+      run: npm run test:coverage
+      
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./coverage/coverage-final.json
+        fail_ci_if_error: false

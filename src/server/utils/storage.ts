@@ -324,6 +324,47 @@ export async function getPostById(id: string): Promise<Post | null> {
   }
 }
 
+export async function getPostsByHashtag(hashtag: string, options: { 
+  limit?: number; 
+  offset?: number; 
+  sortBy?: string 
+} = {}): Promise<Post[]> {
+  try {
+    const data = await readData()
+    const normalizedHashtag = hashtag.toLowerCase()
+    
+    // Filter posts that contain the specified hashtag
+    let posts = Object.values(data.posts).filter(post => 
+      post.hashtags && post.hashtags.some(tag => 
+        tag.toLowerCase() === normalizedHashtag
+      )
+    )
+    
+    // Sort posts
+    const { sortBy = 'createdAt' } = options
+    posts.sort((a, b) => {
+      if (sortBy === 'createdAt' || sortBy === 'updatedAt') {
+        return new Date(b[sortBy]).getTime() - new Date(a[sortBy]).getTime()
+      }
+      return b[sortBy] - a[sortBy]
+    })
+    
+    // Apply pagination
+    const { offset = 0, limit } = options
+    if (limit) {
+      posts = posts.slice(offset, offset + limit)
+    }
+    
+    return posts
+  } catch (error) {
+    throw createStorageError(
+      'Failed to retrieve posts by hashtag',
+      STORAGE_ERROR_CODES.FILE_NOT_FOUND,
+      { originalError: (error as Error).message, hashtag }
+    )
+  }
+}
+
 export async function updatePost(id: string, updates: Partial<Post>): Promise<Post | null> {
   try {
     const data = await readData()
