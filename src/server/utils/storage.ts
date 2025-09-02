@@ -90,7 +90,7 @@ async function ensureDataDirectory(): Promise<void> {
   }
 }
 
-async function readData(): Promise<StorageData> {
+export async function readData(): Promise<StorageData> {
   // Return cached data if valid
   const now = Date.now()
   if (dataCache && (now - cacheTimestamp) < CACHE_TTL) {
