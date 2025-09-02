@@ -1,3 +1,4 @@
+import React from 'react';
 import { getEnvConfig } from '../server/middleware/envValidation';
 
 interface ErrorReport {

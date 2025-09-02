@@ -1,5 +1,5 @@
 import { Post } from '@/types/shared'
-import { loadData } from '../utils/storage'
+import { readData } from '../utils/storage'
 import { TRPCError } from '@trpc/server'
 
 /**
@@ -24,7 +24,7 @@ export class SearchService {
         return cached.results
       }
 
-      const data = await loadData()
+      const data = await readData()
       const posts = Object.values(data.posts)
       
       // Normalize search query
@@ -170,7 +170,7 @@ export class SearchService {
         return cached.results as unknown as { hashtag: string; count: number }[]
       }
 
-      const data = await loadData()
+      const data = await readData()
       const posts = Object.values(data.posts)
       
       // Count hashtag usage across all posts
@@ -211,7 +211,7 @@ export class SearchService {
    */
   async getSearchSuggestions(query: string, limit: number = 5): Promise<Array<{ type: 'hashtag' | 'user'; value: string }>> {
     try {
-      const data = await loadData()
+      const data = await readData()
       const posts = Object.values(data.posts)
       
       const normalizedQuery = query.toLowerCase().trim()

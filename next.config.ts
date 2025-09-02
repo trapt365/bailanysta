@@ -1,11 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Enable Turbopack features (moved from experimental.turbo)
-  turbo: {
-    // Enable Turbopack optimizations
-    resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
-  },
 
   // Production optimizations
   compress: true, // Enable gzip compression
