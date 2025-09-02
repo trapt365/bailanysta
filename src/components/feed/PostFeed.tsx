@@ -1,35 +1,28 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import { trpc } from '@/utils/trpc'
 import { Post } from '@/types/shared'
 import PostCard from './PostCard'
 import PostCardSkeleton from '../ui/PostCardSkeleton'
 
 export default function PostFeed() {
-  const [posts, setPosts] = useState<Post[]>([])
-
-  // Fetch posts using tRPC
+  // Fetch posts using tRPC and transform dates
   const { data: fetchedPosts = [], isLoading, error } = trpc.posts.list.useQuery(
-    { limit: 20 },
-    {
-      onSuccess: (data) => {
-        const postsWithDates = data.map(post => ({
-          ...post,
-          createdAt: new Date(post.createdAt),
-          updatedAt: new Date(post.updatedAt)
-        }))
-        setPosts(postsWithDates)
-      }
-    }
+    { limit: 20 }
   )
+  
+  // Transform posts with proper Date objects
+  const posts = fetchedPosts.map(post => ({
+    ...post,
+    createdAt: new Date(post.createdAt),
+    updatedAt: new Date(post.updatedAt)
+  }))
 
   const handlePostUpdate = (updatedPost: Post) => {
-    setPosts(prevPosts => 
-      prevPosts.map(post => 
-        post.id === updatedPost.id ? updatedPost : post
-      )
-    )
+    // In a real app, we'd use query invalidation here
+    // For now, just refresh the page
+    window.location.reload()
   }
 
   if (isLoading) {
