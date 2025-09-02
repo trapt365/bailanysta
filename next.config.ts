@@ -1,12 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Enable experimental Turbopack features
-  experimental: {
-    turbo: {
-      // Enable Turbopack optimizations
-      resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
-    },
+  // Enable Turbopack features (moved from experimental.turbo)
+  turbo: {
+    // Enable Turbopack optimizations
+    resolveExtensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
   },
 
   // Production optimizations
@@ -88,11 +86,6 @@ const nextConfig: NextConfig = {
 
   // Output configuration
   output: 'standalone',
-  
-  // Environment configuration
-  env: {
-    NEXT_RUNTIME: 'nodejs',
-  },
 };
 
 export default nextConfig;
