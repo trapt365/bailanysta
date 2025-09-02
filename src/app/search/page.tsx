@@ -14,7 +14,7 @@ export default function Search() {
   const router = useRouter()
   
   // Get search query from URL params
-  const query = searchParams.get('q') || ''
+  const query = searchParams?.get('q') || ''
 
   // Handle post updates in search results
   const handlePostUpdate = (updatedPost: Post) => {
