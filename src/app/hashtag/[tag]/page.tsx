@@ -21,7 +21,7 @@ export default function HashtagPage() {
   const router = useRouter()
   
   // Get the hashtag from URL params and decode it
-  const tag = typeof params.tag === 'string' ? decodeURIComponent(params.tag) : ''
+  const tag = params?.tag && typeof params.tag === 'string' ? decodeURIComponent(params.tag) : ''
   
   // Handle post updates (refresh counts, etc.)
   const handlePostUpdate = (updatedPost: Post) => {
