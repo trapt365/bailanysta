@@ -16,7 +16,8 @@
       "Bash(git add:*)",
       "Bash(git push:*)",
       "Bash(npx vitest run:*)",
-      "Bash(npx vitest:*)"
+      "Bash(npx vitest:*)",
+      "Bash(npx vercel:*)"
     ],
     "deny": [],
     "ask": []
