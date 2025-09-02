@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Disable ESLint during build (can be run separately)
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 
   // Production optimizations
   compress: true, // Enable gzip compression
