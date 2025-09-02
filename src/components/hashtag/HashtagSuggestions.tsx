@@ -5,7 +5,7 @@ import { trpc } from '@/utils/trpc'
 import { extractHashtags } from '@/utils/hashtags'
 
 interface HashtagSuggestionsProps {
-  textareaRef: React.RefObject<HTMLTextAreaElement>
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>
   content: string
   onContentChange: (content: string) => void
   className?: string
