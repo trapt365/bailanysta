@@ -27,7 +27,10 @@ function CommentInput({ postId, onCommentSubmit }: CommentInputProps) {
   const createCommentMutation = trpc.comments.create.useMutation({
     onSuccess: (result) => {
       if (result.success) {
-        onCommentSubmit(result.comment)
+        onCommentSubmit({
+          ...result.comment,
+          createdAt: new Date(result.comment.createdAt)
+        })
         setContent('')
       }
     },
