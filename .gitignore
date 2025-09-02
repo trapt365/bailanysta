@@ -75,3 +75,8 @@ coverage/
 # Temporary files
 tmp/
 temp/
+
+# Excluded directories
+.bmad.core/
+.claude/
+.devcontainer/
