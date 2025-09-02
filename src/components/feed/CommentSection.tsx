@@ -176,9 +176,14 @@ export default function CommentSection({ post, onCommentAdded }: CommentSectionP
     onCommentAdded?.(newComment)
   }
 
+  const formattedComments = comments.map(comment => ({
+    ...comment,
+    createdAt: new Date(comment.createdAt)
+  }))
+
   return (
     <div className="mt-4">
-      <CommentList postId={post.id} comments={comments} />
+      <CommentList postId={post.id} comments={formattedComments} />
       <CommentInput postId={post.id} onCommentSubmit={handleCommentAdded} />
     </div>
   )
