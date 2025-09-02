@@ -223,6 +223,8 @@ function SearchResultItem({ post, query, onUpdate }: SearchResultItemProps) {
   // Create post with highlighted content for display
   const highlightedPost = {
     ...post,
+    createdAt: new Date(post.createdAt),
+    updatedAt: new Date(post.updatedAt),
     content: post.content // We'll handle highlighting in the render
   }
 

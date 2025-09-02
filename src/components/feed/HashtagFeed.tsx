@@ -142,7 +142,11 @@ export default function HashtagFeed({ hashtag, onPostUpdate }: HashtagFeedProps)
       {posts.map((post) => (
         <PostCard
           key={post.id}
-          post={post}
+          post={{
+            ...post,
+            createdAt: new Date(post.createdAt),
+            updatedAt: new Date(post.updatedAt)
+          }}
           onUpdate={onPostUpdate}
         />
       ))}

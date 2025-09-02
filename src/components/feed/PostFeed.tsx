@@ -14,7 +14,12 @@ export default function PostFeed() {
     { limit: 20 },
     {
       onSuccess: (data) => {
-        setPosts(data)
+        const postsWithDates = data.map(post => ({
+          ...post,
+          createdAt: new Date(post.createdAt),
+          updatedAt: new Date(post.updatedAt)
+        }))
+        setPosts(postsWithDates)
       }
     }
   )
